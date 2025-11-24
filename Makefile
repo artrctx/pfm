@@ -7,7 +7,7 @@ build:
 
 # Run the application
 run:
-	@go run cmd/cli/main.go -race
+	@go run --race cmd/cli/main.go
 
 # Test the application
 test:
