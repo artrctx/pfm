@@ -17,15 +17,14 @@ func NewClient(stunAddr string) *Client {
 		return client
 	}
 
-	// stunAddr := "stun:stun1.l.google.com:3478"
 	addr, err := stn.ParseURI(stunAddr)
 	if err != nil {
-		log.Panicf("tcp addr resolve error: %v", err)
+		log.Fatalf("tcp addr resolve error: %v", err)
 	}
 
 	c, err := stn.DialURI(addr, &stn.DialConfig{})
 	if err != nil {
-		log.Panicf("tcp conn error: %v", err)
+		log.Fatalf("tcp conn error: %v", err)
 	}
 
 	client = &Client{c}

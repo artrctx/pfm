@@ -14,7 +14,7 @@ var rootCmd = &cobra.Command{
 	Short: "Port forward designated port and make it accesible",
 	Long: `Port forward given port so your friend can access your destination. 
 	(ONLY SUPPORTS LINUX FOR NOW)
-	pfm --platform linux --port --stun stun:stun1.l.google.com:3478`,
+	pfm --port --stun stun:stun1.l.google.com:3478`,
 	Run: portForwardMe,
 }
 

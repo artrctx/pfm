@@ -3,6 +3,7 @@ module github.com/arthurDiff/pfm
 go 1.25.4
 
 require (
+	github.com/coreos/go-iptables v0.8.0
 	github.com/pion/stun v0.6.1
 	github.com/spf13/cobra v1.10.1
 )
