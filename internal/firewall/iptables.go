@@ -4,32 +4,32 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/coreos/go-iptables/iptables"
+	ipts "github.com/coreos/go-iptables/iptables"
 )
 
 // https://www.ipserverone.info/knowledge-base/how-to-open-ports-in-iptables/
-type IPTables struct{ client *iptables.IPTables }
+type iptables struct{ binding *ipts.IPTables }
 
-var iptclient *IPTables
-
-func newIptables() *IPTables {
-	if iptclient != nil {
-		return iptclient
-	}
+func newIptables() *iptables {
 	// defualt ipv4 protocol
-	client, err := iptables.New()
+	binding, err := ipts.New()
 	if err != nil {
 		log.Fatalf("Failed to initialize IPTables with error %v", err)
 	}
-	iptclient = &IPTables{client}
-	return iptclient
+	return &iptables{binding}
 }
 
-func (ipt *IPTables) allowPort(port uint16) error {
-	list, err := ipt.client.List("filter", "INPUT")
+func (ipt *iptables) AllowPort(port uint16) error {
+	// append input rule
+	err := ipt.binding.AppendUnique("filter", "INPUT", "-p all", fmt.Sprintf("--dport %v", port), "-j ACCEPT")
 	if err != nil {
 		return err
 	}
-	fmt.Println(list, "list here")
+
+	err = ipt.binding.AppendUnique("filter", "OUTPUT", "-p all", fmt.Sprintf("--dport %v", port), "-j ACCEPT")
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

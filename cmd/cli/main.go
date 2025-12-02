@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"runtime"
+	"log"
 
+	"github.com/arthurDiff/pfm/internal/firewall"
 	"github.com/arthurDiff/pfm/internal/stun"
 	"github.com/spf13/cobra"
 )
@@ -29,8 +29,14 @@ func portForwardMe(cmd *cobra.Command, args []string) {
 	stunClient := stun.NewClient(stunAddr)
 	defer stunClient.Close()
 
-	osName := runtime.GOOS
-	fmt.Println(osName)
+	// osName := runtime.GOOS
+	// fmt.Println(osName)
+
+	fw := firewall.New(firewall.IPTables)
+	err := fw.AllowPort(8080)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	// TODO
 	// CONFIG FIREWALL TO PROVIDED OPEN PORT (Defer reset firewall setting)
