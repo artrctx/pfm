@@ -1,6 +1,7 @@
 package firewall
 
 import (
+	"io"
 	"log"
 )
 
@@ -12,7 +13,7 @@ const (
 )
 
 type Firewall interface {
-	AllowPort(port uint16) error
+	AllowPort(port uint16) (io.Closer, error)
 }
 
 var fw Firewall
