@@ -5,6 +5,24 @@ import (
 	"io"
 )
 
+type Protocol string
+
+const (
+	TCP Protocol = "tcp"
+	UDP Protocol = "udp"
+)
+
+func GetProtocol(p string) (Protocol, error) {
+	switch p {
+	case string(TCP):
+		return TCP, nil
+	case string(UDP):
+		return UDP, nil
+	default:
+		return "", fmt.Errorf("protocol name: %v is not valid", p)
+	}
+}
+
 type Provider string
 
 const (
@@ -28,15 +46,10 @@ type Ruleset interface {
 }
 
 type Firewall interface {
-	AllowPort(port uint16) (Ruleset, error)
+	AllowPort(port uint16, protocol Protocol) (Ruleset, error)
 }
 
-var fw Firewall
-
 func New(provider Provider) (Firewall, error) {
-	if fw != nil {
-		return fw, nil
-	}
 	switch provider {
 	case IPTables:
 		return newIptables()

@@ -75,12 +75,10 @@ func (rs ruleset) Close() error {
 	return rs.rules.deleteAll(rs.ipt)
 }
 
-func (ipt *iptables) AllowPort(port uint16) (Ruleset, error) {
+func (ipt *iptables) AllowPort(port uint16, protocol Protocol) (Ruleset, error) {
 	ruleset := ruleset{ipt, []*rule{
-		{chain: "INPUT", rulespecs: []string{"-p", "tcp", "--dport", strconv.FormatUint(uint64(port), 10), "-j", "ACCEPT"}},
-		{chain: "INPUT", rulespecs: []string{"-p", "udp", "--dport", strconv.FormatUint(uint64(port), 10), "-j", "ACCEPT"}},
-		{chain: "OUTPUT", rulespecs: []string{"-p", "tcp", "--dport", strconv.FormatUint(uint64(port), 10), "-j", "ACCEPT"}},
-		{chain: "OUTPUT", rulespecs: []string{"-p", "udp", "--dport", strconv.FormatUint(uint64(port), 10), "-j", "ACCEPT"}},
+		{chain: "INPUT", rulespecs: []string{"-p", string(protocol), "--dport", strconv.FormatUint(uint64(port), 10), "-j", "ACCEPT"}},
+		{chain: "OUTPUT", rulespecs: []string{"-p", string(protocol), "--dport", strconv.FormatUint(uint64(port), 10), "-j", "ACCEPT"}},
 	}}
 
 	if err := ruleset.appendAll(); err != nil {

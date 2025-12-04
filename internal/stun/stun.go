@@ -10,13 +10,7 @@ import (
 // https://datatracker.ietf.org/doc/html/rfc5389
 type Client struct{ client *stn.Client }
 
-var client *Client
-
 func NewClient(stunAddr string) (*Client, error) {
-	if client != nil {
-		return client, nil
-	}
-
 	addr, err := stn.ParseURI(stunAddr)
 	if err != nil {
 		return nil, fmt.Errorf("tcp addr resolve error: %v", err)
@@ -27,8 +21,7 @@ func NewClient(stunAddr string) (*Client, error) {
 		return nil, fmt.Errorf("tcp conn error: %v", err)
 	}
 
-	client = &Client{c}
-	return client, nil
+	return &Client{c}, nil
 }
 
 func (c *Client) GetIP() (stn.XORMappedAddress, error) {
