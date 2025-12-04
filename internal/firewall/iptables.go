@@ -2,7 +2,6 @@ package firewall
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	ipts "github.com/coreos/go-iptables/iptables"
@@ -12,13 +11,13 @@ import (
 // https://www.ipserverone.info/knowledge-base/how-to-open-ports-in-iptables/
 type iptables struct{ binding *ipts.IPTables }
 
-func newIptables() *iptables {
+func newIptables() (*iptables, error) {
 	// defualt ipv4 protocol
 	binding, err := ipts.New()
 	if err != nil {
-		log.Fatalf("Failed to initialize IPTables with error %v", err)
+		return nil, fmt.Errorf("Failed to initialize IPTables with error %w", err)
 	}
-	return &iptables{binding}
+	return &iptables{binding}, nil
 }
 
 type rule struct {

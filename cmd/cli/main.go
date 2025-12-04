@@ -1,10 +1,8 @@
 package main
 
 import (
-	"log"
-
-	"github.com/arthurDiff/pfm/internal/firewall"
-	"github.com/arthurDiff/pfm/internal/stun"
+	"github.com/artrctx/pfm/internal/firewall"
+	"github.com/artrctx/pfm/internal/stun"
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +12,7 @@ var rootCmd = &cobra.Command{
 	Short: "Port forward designated port and make it accesible",
 	Long: `Port forward given port so your friend can access your destination. 
 	(ONLY SUPPORTS LINUX FOR NOW)
-	pfm --port --stun stun:stun1.l.google.com:3478`,
+	pfm --port 25565 --firewall iptables --stun stun:stun1.l.google.com:3478`,
 	Run: portForwardMe,
 }
 
@@ -23,19 +21,29 @@ var (
 	port uint16
 	// for stun server
 	stunAddr string
+	// for firewall config
+	firewallProvider string
 )
 
 func portForwardMe(cmd *cobra.Command, args []string) {
-	stunClient := stun.NewClient(stunAddr)
+	stunClient, err := stun.NewClient(stunAddr)
+	if err != nil {
+		panic(err)
+	}
 	defer stunClient.Close()
 
-	// osName := runtime.GOOS
-	// fmt.Println(osName)
+	provider, err := firewall.GetProvider(firewallProvider)
+	if err != nil {
+		panic(err)
+	}
 
-	fw := firewall.New(firewall.IPTables)
+	fw, err := firewall.New(provider)
+	if err != nil {
+		panic(err)
+	}
 	ruleset, err := fw.AllowPort(8080)
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 	defer ruleset.Close()
 
@@ -52,6 +60,8 @@ func portForwardMe(cmd *cobra.Command, args []string) {
 func init() {
 	rootCmd.Flags().Uint16VarP(&port, "port", "p", 0, "Port to forward request to")
 	rootCmd.MarkFlagRequired("port")
+
+	rootCmd.Flags().StringVarP(&firewallProvider, "firewall", "f", "iptables", "Firewall provider name (currently supports iptables only)")
 
 	rootCmd.Flags().StringVarP(&stunAddr, "stun", "s", "stun:stun1.l.google.com:3478", "STUN address to use")
 }

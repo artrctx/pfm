@@ -1,7 +1,7 @@
 package stun
 
 import (
-	"log"
+	"fmt"
 
 	stn "github.com/pion/stun"
 )
@@ -12,23 +12,23 @@ type Client struct{ client *stn.Client }
 
 var client *Client
 
-func NewClient(stunAddr string) *Client {
+func NewClient(stunAddr string) (*Client, error) {
 	if client != nil {
-		return client
+		return client, nil
 	}
 
 	addr, err := stn.ParseURI(stunAddr)
 	if err != nil {
-		log.Fatalf("tcp addr resolve error: %v", err)
+		return nil, fmt.Errorf("tcp addr resolve error: %v", err)
 	}
 
 	c, err := stn.DialURI(addr, &stn.DialConfig{})
 	if err != nil {
-		log.Fatalf("tcp conn error: %v", err)
+		return nil, fmt.Errorf("tcp conn error: %v", err)
 	}
 
 	client = &Client{c}
-	return client
+	return client, nil
 }
 
 func (c *Client) GetIP() (stn.XORMappedAddress, error) {
