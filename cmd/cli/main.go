@@ -33,11 +33,11 @@ func portForwardMe(cmd *cobra.Command, args []string) {
 	// fmt.Println(osName)
 
 	fw := firewall.New(firewall.IPTables)
-	rule, err := fw.AllowPort(8080)
+	ruleset, err := fw.AllowPort(8080)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer rule.Close()
+	defer ruleset.Close()
 
 	// TODO
 	// CONFIG FIREWALL TO PROVIDED OPEN PORT (Defer reset firewall setting)

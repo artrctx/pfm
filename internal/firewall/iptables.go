@@ -2,8 +2,8 @@ package firewall
 
 import (
 	"fmt"
-	"io"
 	"log"
+	"strconv"
 
 	ipts "github.com/coreos/go-iptables/iptables"
 	"golang.org/x/sync/errgroup"
@@ -46,7 +46,7 @@ func (r *rule) delete(ipt *iptables) error {
 	return ipt.binding.DeleteIfExists("filter", r.chain, r.rulespecs...)
 }
 
-type rules []rule
+type rules []*rule
 
 func (rs rules) deleteAll(ipt *iptables) error {
 	g := errgroup.Group{}
@@ -67,7 +67,7 @@ func (rs ruleset) appendAll() error {
 		err := r.append(rs.ipt)
 		if err != nil {
 			cleanErr := applied.deleteAll(rs.ipt)
-			return fmt.Errorf("append error: %w; cleanup error: %w", err, cleanErr)
+			return fmt.Errorf("iptables append error: %w | %w", err, cleanErr)
 		}
 	}
 	return nil
@@ -76,12 +76,12 @@ func (rs ruleset) Close() error {
 	return rs.rules.deleteAll(rs.ipt)
 }
 
-func (ipt *iptables) AllowPort(port uint16) (io.Closer, error) {
-	ruleset := ruleset{ipt, []rule{
-		{chain: "INPUT", rulespecs: []string{"-p tcp", fmt.Sprintf("--dport %v", port), "-j ACCEPT"}},
-		{chain: "INPUT", rulespecs: []string{"-p udp", fmt.Sprintf("--dport %v", port), "-j ACCEPT"}},
-		{chain: "OUTPUT", rulespecs: []string{"-p tcp", fmt.Sprintf("--dport %v", port), "-j ACCEPT"}},
-		{chain: "OUTPUT", rulespecs: []string{"-p tcp", fmt.Sprintf("--dport %v", port), "-j ACCEPT"}},
+func (ipt *iptables) AllowPort(port uint16) (Ruleset, error) {
+	ruleset := ruleset{ipt, []*rule{
+		{chain: "INPUT", rulespecs: []string{"-p", "tcp", "--dport", strconv.FormatUint(uint64(port), 10), "-j", "ACCEPT"}},
+		{chain: "INPUT", rulespecs: []string{"-p", "udp", "--dport", strconv.FormatUint(uint64(port), 10), "-j", "ACCEPT"}},
+		{chain: "OUTPUT", rulespecs: []string{"-p", "tcp", "--dport", strconv.FormatUint(uint64(port), 10), "-j", "ACCEPT"}},
+		{chain: "OUTPUT", rulespecs: []string{"-p", "udp", "--dport", strconv.FormatUint(uint64(port), 10), "-j", "ACCEPT"}},
 	}}
 
 	if err := ruleset.appendAll(); err != nil {

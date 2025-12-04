@@ -12,8 +12,12 @@ const (
 	NFTables Provider = "nptables"
 )
 
+type Ruleset interface {
+	io.Closer
+}
+
 type Firewall interface {
-	AllowPort(port uint16) (io.Closer, error)
+	AllowPort(port uint16) (Ruleset, error)
 }
 
 var fw Firewall
