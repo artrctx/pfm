@@ -19,7 +19,7 @@ go install github.com/artrctx/pfm
 #### Run:
 
 ```bash
-pfm --port 25565 --protocol tcp --firewall iptables
+sudo pfm --port 25565 --protocol tcp --firewall iptables
 ```
 
 #### Example Output:
